@@ -29,10 +29,12 @@ def get_tetris(session, channel):
     return session.get(path + "/tetris/{id}/robot".format(id=channel)).json()
 
 def go_interactive(session, channel_id, version, code):
+    """Force a channel into an interactive mode using the interactive game's version and sharecode."""
     interactiveDetails=dict(tetrisGameId=version, tetrisShareCode=code, interactive=1)
     return session.put(path + "/channels/{id}".format(id=channel_id), interactiveDetails).json()
 
 def get_controls(session, channel_id):
+    """Retrieve control information for the currently running game on a channel_id"""
     return session.get(path + "/tetris/{id}".format(id=channel_id)).json()
 
 def on_handshake(line, conn):
@@ -91,9 +93,14 @@ def connect():
 
     interactiveData = go_interactive(session, channel_id, game_version, share_code)
 
+
+    #Our tactile key codes can be retrieved from the get_controls routine
     controls = get_controls(session, channel_id)
+    #The tactiles live in version.controls.tactiles
     tactiles = controls["version"]["controls"]["tactiles"]
 
+    #tactiles can now easily be used to map a tactile id from an incoming report
+    #to a tactile keycode from the controls editor
     for tactile in tactiles:
         print("ID {} is key {}".format(tactile["id"],tactile["key"]))
 
